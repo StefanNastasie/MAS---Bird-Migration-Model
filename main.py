@@ -106,37 +106,65 @@ class Slider():
 
 #Agent class
 
-agent_image = pygame.image.load("arrow-pointer.png")
+agents = pygame.sprite.Group()
+#add all agents to a sprite group for easy iteration
 
-
-class Agent():
-    def __init__(self, init_pos, number, speed):
+class Agent(pygame.sprite.Sprite):
+    def __init__(self, init_pos, number, speed, color):
+        pygame.sprite.Sprite.__init__(self, agents)
         self.n = number
         self.originX, self.originY = init_pos
         self.posX, self.posY = init_pos
         self.speed = speed
+        self.time_alive = 0
+        self.image = pygame.image.load("arrow-pointer.png")
+        self.image.fill(color)
 
 
     def find_partner(self, random_agent):
-        self.partner = random_agent
+        if pygame.sprite.collide_rect(self, random_agent):
+            if random.randint(0, 101) < 2:
+                self.partner = random_agent
+                
 
-
-    def moveTowards(self, entity):
+    def update(self):
+        entity = self.goal()
         if abs(self.posX - entity.posX) > 5:
             self.posX += (entity.posX-self.posX)/50
         if abs(self.posY - entity.posY) > 5:
             self.posY += (entity.posY-self.posY)/20
+        self.time_alive += 1
 
     def death(self):
+        while self.time_alive > 180:
+            if random.randint(0,101) < 5:
+                #make sure this happens only once every tick?
+                self.kill()
+        
+                
+    def reproduction(self, partner):
+        partner = self.partner
+        Agent([self.posx, self.posy], new_number(agents), self.speed, self.color, 0)
+
+    def goal(self):
+        while self.summer():
+            x_goal = self.posx + random.randint(-5, 6)
+            y_goal = self.posy + random.randint(-5, 6)
+            #make sure this only happens once every tick?
+                       
+        if not self.summer():
+            pass
+            #new goal in different hemisphere
+    
+    def summer(self):
+        #returns true if temperature at current position is over a ceratin value
         pass
-    #to be completed
 
-    def reproduction(self):
-        pass
-    #to be completed
-
-    #think of other methods to add?
-
+def new_number(agents):
+    nums = []
+    for i in agents:
+        nums += i.number
+    return (max(nums) + 1)
 
 class Temperature():
 
