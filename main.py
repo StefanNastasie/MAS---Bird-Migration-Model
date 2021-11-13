@@ -1,8 +1,9 @@
-import pygame, math, sys
+import pygame, math, sys, datetime
 from random import randint
 
 
 pygame.init()
+pygame.font.init()
 
 #set values for screen size
 
@@ -22,7 +23,7 @@ ORANGE = (200, 100, 50)
 CYAN = (0, 255, 255)
 MAGENTA = (255, 0, 255)
 TRANS = (1, 1, 1)
-
+BBYBLUE = (202,228,241)
 
 #class i found on the internet, might help us change background
 
@@ -104,6 +105,8 @@ class Slider():
         if self.val > self.maxi:
             self.val = self.maxi
 
+
+
 #Agent class
 
 agents = pygame.sprite.Group()
@@ -125,7 +128,7 @@ class Agent(pygame.sprite.Sprite):
         if pygame.sprite.collide_rect(self, random_agent):
             if random.randint(0, 101) < 2:
                 self.partner = random_agent
-                
+
 
     def update(self):
         entity = self.goal()
@@ -140,8 +143,8 @@ class Agent(pygame.sprite.Sprite):
             if random.randint(0,101) < 5:
                 #make sure this happens only once every tick?
                 self.kill()
-        
-                
+
+
     def reproduction(self, partner):
         partner = self.partner
         Agent([self.posx, self.posy], new_number(agents), self.speed, self.color, 0)
@@ -151,11 +154,11 @@ class Agent(pygame.sprite.Sprite):
             x_goal = self.posx + random.randint(-5, 6)
             y_goal = self.posy + random.randint(-5, 6)
             #make sure this only happens once every tick?
-                       
+
         if not self.summer():
             pass
             #new goal in different hemisphere
-    
+
     def summer(self):
         #returns true if temperature at current position is over a ceratin value
         pass
@@ -166,16 +169,59 @@ def new_number(agents):
         nums += i.number
     return (max(nums) + 1)
 
-class Temperature():
 
-    def __init__(self, region, hemisphere, min_value, max_value, location):
-        self.region = region #name of the temp region
+class Region():
+
+    def __init__(self, name, hemisphere, min_value, max_value, location):
+        self.name = name #name of the temp region
         self.hemisphere = hemisphere #hemisphere bool
         self.min_value = min_value #min value that the temp can reach
         self.max_value = max_value #max value that the temp can reach
         self.location = location #location border on the screen
 
+
+    def temperature(self,date):
+        pass
     #add methods
+
+
+
+class display_info():
+
+    def __init__(self, xpos, ypos):
+        self.xpos = xpos
+        self.ypos = ypos
+        self.font = pygame.font.SysFont("Magenta", 20)
+        self.color = MAGENTA
+
+    def draw(self):
+
+        date_info = self.font.render(str(date), 1, self.color)
+        population_info = self.font.render('population:{}'.format(population_counter), 1, self.color)
+        screen.blit(date_info, (self.xpos, self.ypos+25))
+        screen.blit(population_info, (self.xpos, self.ypos))
+
+
+start_img = pygame.image.load('play.png')
+
+class Button():
+    def __init__(self,x,y,image,scale):
+        width = image.get_width()
+        height = image.get_height()
+        self.image = pygame.transform.scale(image,(int(width*scale),int(height*scale)))
+        self.circle = self.image.get_rect()
+        self.circle.topleft = (x,y)
+        self.clicked = False
+
+    def draw(self):
+        screen.blit(self.image,(self.circle.x,self.circle.y))
+
+    def start_click(self):
+        pos = pygame.mouse.get_pos()
+        if self.circle.collidepoint(pos):
+            if pygame.mouse.get_pressed()[0] == 1 and self.clicked == False:
+                self.clicked = True
+                return True
 
 
 
@@ -188,20 +234,36 @@ clock = pygame.time.Clock()
 pygame.display.set_caption("Bird Migration Model")
 icon = pygame.image.load('bird.png')
 pygame.display.set_icon(icon)
+population_counter = 10
+date = datetime.date(2022,1,1)
+date_change = datetime.timedelta(days=1)
+display = display_info(X-120, 10)
+start_button = Button(X-120, 60,start_img,0.1)
 
 
 #Game Loop
-
 running = True
+run_simulation = False
 
 while running:
+
+    screen.fill(BBYBLUE)
+    start_button.draw()
+
 
     for event in pygame.event.get():
         if event.type == pygame.QUIT:
             running = False
             pygame.quit()
-    if running:
-        screen.fill(BLACK)
+            sys.exit(0)
 
 
 
+    display.draw()
+    clock.tick(5)
+    pygame.display.flip()
+    if start_button.start_click():
+        run_simulation = True
+
+    if run_simulation:
+        date += date_change
