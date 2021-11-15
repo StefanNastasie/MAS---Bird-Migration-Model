@@ -127,9 +127,9 @@ class Agent(pygame.sprite.Sprite):
 
     def find_partner(self):
         if pygame.sprite.spritecollide(self, agents, False):
-            if self.cooldown <= 0:  
+            if self.cooldown <= 0:
                 if random.randint(0, 101) < 2:
-                self.partner = 1
+                    self.partner = 1
             else:
                 self.cooldown -= 1
 
@@ -230,6 +230,56 @@ class Button():
                 self.clicked = True
                 return True
 
+class Border():
+    def __init__(self,xleft,yleft,xright,yright,color):
+        self.xleft = xleft
+        self.yleft = yleft
+        self.xright = xright
+        self.yright = yright
+        self.color = color
+
+    def draw_dotted(self):
+        draw_dashed_line(screen,self.color,(self.xleft,self.yleft),(self.xright,self.yright))
+
+    def draw(self):
+        pygame.draw.line(screen,self.color,(self.xleft,self.yleft),(self.xright,self.yright))
+
+def draw_dashed_line(surf, color, start_pos, end_pos, width=1, dash_length=10):
+    x1, y1 = start_pos
+    x2, y2 = end_pos
+    dl = dash_length
+
+    if x1 == x2:
+        ycoords = [y for y in range(y1, y2, dl if y1 < y2 else -dl)]
+        xcoords = [x1] * len(ycoords)
+    elif y1 == y2:
+        xcoords = [x for x in range(x1, x2, dl if x1 < x2 else -dl)]
+        ycoords = [y1] * len(xcoords)
+    else:
+        a = abs(x2 - x1)
+        b = abs(y2 - y1)
+        c = round(math.sqrt(a**2 + b**2))
+        dx = dl * a / c
+        dy = dl * b / c
+
+        xcoords = [x for x in numpy.arange(x1, x2, dx if x1 < x2 else -dx)]
+        ycoords = [y for y in numpy.arange(y1, y2, dy if y1 < y2 else -dy)]
+
+    next_coords = list(zip(xcoords[1::2], ycoords[1::2]))
+    last_coords = list(zip(xcoords[0::2], ycoords[0::2]))
+    for (x1, y1), (x2, y2) in zip(next_coords, last_coords):
+        start = (round(x1), round(y1))
+        end = (round(x2), round(y2))
+        pygame.draw.line(surf, color, start, end, width)
+
+
+
+
+
+
+
+
+
 
 
 
@@ -246,6 +296,31 @@ date = datetime.date(2022,1,1)
 date_change = datetime.timedelta(days=1)
 display = display_info(X-120, 10)
 start_button = Button(X-120, 60,start_img,0.1)
+
+
+#region borders
+
+border_1 = Border(100,480,760,480,RED)
+border_2 = Border(100,360,760,360,RED)
+border_3 = Border(100,300,760,300,RED)
+border_4 = Border(100,240,760,240,RED)
+border_5 = Border(100,120,760,120,RED)
+
+borders = [border_1,border_2,border_3,border_4,border_5]
+
+#screen borders
+
+sborder_1 = Border(750,0,750,600,BLACK)
+sborder_2 = Border(100,0,100,600,BLACK)
+sborder_3 = Border(0,480,100,480,BLACK)
+sborder_4 = Border(0,360,100,360,BLACK)
+sborder_5 = Border(0,300,100,300,BLACK)
+sborder_6 = Border(0,240,100,240,BLACK)
+sborder_7 = Border(0,120,100,120,BLACK)
+
+sborders = [sborder_1,sborder_2,sborder_3,sborder_4,sborder_5,sborder_6,sborder_7]
+
+
 
 
 #Game Loop
@@ -267,6 +342,11 @@ while running:
 
 
     display.draw()
+    for border in borders:
+        border.draw_dotted()
+    for sborder in sborders:
+        sborder.draw()
+
     clock.tick(5)
     pygame.display.flip()
     if start_button.start_click():
@@ -274,9 +354,9 @@ while running:
 
     if run_simulation:
         date += date_change
-       
+
     #reproduction loop needs to be added in game loop, but should only run once per tick
     #for agent in agents:
-        #agents.remove(agent)
-        #agent.find_partner()
-        #agents.add(agent)
+    #agents.remove(agent)
+    #agent.find_partner()
+    #agents.add(agent)
