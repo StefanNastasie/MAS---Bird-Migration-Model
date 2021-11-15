@@ -122,42 +122,50 @@ class Agent(pygame.sprite.Sprite):
         self.time_alive = 0
         self.image = pygame.image.load("arrow-pointer.png")
         self.image.fill(color)
+        self.partner = 0
+        self.cooldown = 20
 
-
-    def find_partner(self, random_agent):
-        if pygame.sprite.collide_rect(self, random_agent):
-            if random.randint(0, 101) < 2:
-                self.partner = random_agent
+    def find_partner(self):
+        if pygame.sprite.spritecollide(self, agents, False):
+            if self.cooldown <= 0:  
+                if random.randint(0, 101) < 2:
+                self.partner = 1
+            else:
+                self.cooldown -= 1
 
 
     def update(self):
         entity = self.goal()
-        if abs(self.posX - entity.posX) > 5:
-            self.posX += (entity.posX-self.posX)/50
-        if abs(self.posY - entity.posY) > 5:
+        if abs(self.posX - entity[0]) > 5:
+            self.posX += (entity[0]-self.posX)/50
+        if abs(self.posY - entity[1]) > 5:
             self.posY += (entity.posY-self.posY)/20
         self.time_alive += 1
+        self.check_death()
+        self.reproduction()
 
-    def death(self):
-        while self.time_alive > 180:
+    def check_death(self):
+        if self.time_alive > 180:
             if random.randint(0,101) < 5:
-                #make sure this happens only once every tick?
                 self.kill()
 
 
-    def reproduction(self, partner):
-        partner = self.partner
-        Agent([self.posx, self.posy], new_number(agents), self.speed, self.color, 0)
+    def reproduction(self):
+        if self.partner != 0:
+            Agent([self.posx, self.posy], new_number(agents), self.speed, self.color, 0)
+            self.partner = 0
+            self.cooldown = 20
+
 
     def goal(self):
-        while self.summer():
+        if self.summer():
             x_goal = self.posx + random.randint(-5, 6)
             y_goal = self.posy + random.randint(-5, 6)
-            #make sure this only happens once every tick?
-
+            goal = [x_goal, y_goal]
+            return goal
         if not self.summer():
             pass
-            #new goal in different hemisphere
+
 
     def summer(self):
         #returns true if temperature at current position is over a ceratin value
@@ -168,7 +176,6 @@ def new_number(agents):
     for i in agents:
         nums += i.number
     return (max(nums) + 1)
-
 
 class Region():
 
@@ -267,3 +274,9 @@ while running:
 
     if run_simulation:
         date += date_change
+       
+    #reproduction loop needs to be added in game loop, but should only run once per tick
+    #for agent in agents:
+        #agents.remove(agent)
+        #agent.find_partner()
+        #agents.add(agent)
