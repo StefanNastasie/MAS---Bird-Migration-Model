@@ -114,54 +114,62 @@ agents = pygame.sprite.Group()
 #add all agents to a sprite group for easy iteration
 
 class Agent(pygame.sprite.Sprite):
-    def __init__(self, init_pos, number, speed, color):
+    def __init__(self, init_pos, number, color):
         pygame.sprite.Sprite.__init__(self, agents)
-        self.n = number
-        self.originX, self.originY = init_pos
-        self.posX, self.posY = init_pos
-        self.speed = speed
+        self.number = number
+        self.speed = [2,2]
         self.time_alive = 0
         self.image = pygame.image.load("arrow-pointer.png")
-        self.image.fill(color)
+        self.image = pygame.transform.scale(self.image, (20, 20))
+        self.rect = self.image.get_rect()
+        self.rect.x = init_pos[0]
+        self.rect.y = init_pos[1]
+        self.image.set_colorkey(BBYBLUE, RLEACCEL)
         self.partner = 0
         self.cooldown = 20
 
     def find_partner(self):
         if pygame.sprite.spritecollide(self, agents, False):
             if self.cooldown <= 0:
-                if random.randint(0, 101) < 2:
+                if randint(0, 101) < 2:
                     self.partner = 1
             else:
                 self.cooldown -= 1
 
+    def move(self):
+        goal = self.goal()
+        if (self.rect.x - goal[0]) > 5:
+            self.rect.x -= self.speed[0]
+        if (self.rect.x - goal[0]) < -5:
+            self.rect.x += self.speed[0]
+        if (self.rect.y - goal[1]) > 5:
+            self.rect.y -= self.speed[1]
+        if (self.rect.y - goal[1]) < -5:
+            self.rect.y += self.speed[1]
 
     def update(self):
-        entity = self.goal()
-        if abs(self.posX - entity[0]) > 5:
-            self.posX += (entity[0]-self.posX)/50
-        if abs(self.posY - entity[1]) > 5:
-            self.posY += (entity.posY-self.posY)/20
+        self.move()
         self.time_alive += 1
         self.check_death()
         self.reproduction()
 
     def check_death(self):
         if self.time_alive > 180:
-            if random.randint(0,101) < 5:
+            if randint(0,101) < 5:
                 self.kill()
 
 
     def reproduction(self):
         if self.partner != 0:
-            Agent([self.posx, self.posy], new_number(agents), self.speed, self.color, 0)
+            Agent([self.rect.x + randint(-100, 100), self.rect.y + randint(-100, 100)], new_number(), BLACK)
             self.partner = 0
             self.cooldown = 20
 
 
     def goal(self):
         if self.summer():
-            x_goal = self.posx + random.randint(-5, 6)
-            y_goal = self.posy + random.randint(-5, 6)
+            x_goal = self.rect.x + randint(-10, 10)
+            y_goal = self.rect.y + randint(-10, 10)
             goal = [x_goal, y_goal]
             return goal
         if not self.summer():
@@ -170,12 +178,14 @@ class Agent(pygame.sprite.Sprite):
 
     def summer(self):
         #returns true if temperature at current position is over a ceratin value
-        pass
+        return True
 
-def new_number(agents):
+def new_number():
     nums = []
+    if len(agents) == 0:
+        return 1
     for i in agents:
-        nums += i.number
+        nums.append(i.number)
     return (max(nums) + 1)
 
 class Region():
@@ -390,6 +400,10 @@ seasons_south = {"January":(-30,-15),"February":(-25,-10),"March":(-15,-5), "Apr
 running = True
 run_simulation = False
 
+#for testing
+for i in range(10):
+    Agent([randint(0,900),randint(0,600)], new_number(), BLACK)
+
 while running:
 
     screen.fill(BBYBLUE)
@@ -407,6 +421,12 @@ while running:
         border.draw_dotted()
     for sborder in sborders:
         sborder.draw()
+    for agent in agents:
+        agent.update()
+        screen.blit(agent.image, agent.rect)
+        agents.remove(agent)
+        agent.find_partner()
+        agents.add(agent)
 
     clock.tick(5)
 
