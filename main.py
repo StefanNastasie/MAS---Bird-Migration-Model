@@ -189,21 +189,64 @@ class Region():
         self.yleft = yleft
         self.uleft = (0,yleft)
         self.dright = (749,yright)
-        self.uright = (X,yleft)
+        self.uright = (749,yleft)
         self.dleft = (0,yright)
-        self.font = pygame.font.SysFont("White", 15)
-        self.color = WHITE
+        self.font = pygame.font.SysFont("Magenta", 15)
+        self.color = MAGENTA
 
-    def temperature(self,current_date):
-        return temperature
+    def temperature(self, current_date):
+        if self.name == "North":
+            month = current_date.month
+            temp_values = seasons_north.values()
+            temp_values_list = list(temp_values)
+            temp_range = temp_values_list[month-1]
+            return randint(temp_range[0],temp_range[1])
+
+        if self.name == "Temperate_north":
+            month = current_date.month
+            temp_values = seasons_temperate_north.values()
+            temp_values_list = list(temp_values)
+            temp_range = temp_values_list[month-1]
+            return randint(temp_range[0],temp_range[1])
+
+        if self.name == "Tropical_north":
+            month = current_date.month
+            temp_values = seasons_tropical_north.values()
+            temp_values_list = list(temp_values)
+            temp_range = temp_values_list[month-1]
+            return randint(temp_range[0],temp_range[1])
+
+        if self.name == "Tropical_south":
+            month = current_date.month
+            temp_values = seasons_tropical_south.values()
+            temp_values_list = list(temp_values)
+            temp_range = temp_values_list[month-1]
+            return randint(temp_range[0],temp_range[1])
+
+        if self.name == "Temperate_south":
+            month = current_date.month
+            temp_values = seasons_temperate_south.values()
+            temp_values_list = list(temp_values)
+            temp_range = temp_values_list[month-1]
+            return randint(temp_range[0],temp_range[1])
+
+        if self.name == "South":
+            month = current_date.month
+            temp_values = seasons_south.values()
+            temp_values_list = list(temp_values)
+            temp_range = temp_values_list[month-1]
+            return randint(temp_range[0],temp_range[1])
+
+
+
     #add methods
 
     def draw_display(self):
 
         region_info = self.font.render(str(self.name), 1, self.color)
         temperature_info = self.font.render('Temperature:{}°C'.format(self.temperature(date)), 1, self.color)
-        screen.blit(region_info, (self.yleft+10, X+20))
-        screen.blit(temperature_info, (self.yleft+20, X+20))
+        screen.blit(region_info, (5,self.yleft+10))
+        screen.blit(temperature_info, (5,self.yleft+20))
 
 class display_info():
 
@@ -284,8 +327,9 @@ def draw_dashed_line(surf, color, start_pos, end_pos, width=1, dash_length=10):
         end = (round(x2), round(y2))
         pygame.draw.line(surf, color, start, end, width)
 
-
-
+def number_to_month(month_number):
+    months = ["January","February","March","April","May","June","July","August","September","October","November","December"]
+    return months[month_number]-1
 
 #some game properties
 
@@ -299,7 +343,7 @@ date = datetime.date(2022,1,1)
 date_change = datetime.timedelta(days=1)
 display = display_info(X-120, 10)
 start_button = Button(X-120, 60,start_img,0.1)
-temperature = 10
+climate_factor = 0
 
 #region borders
 
@@ -323,17 +367,24 @@ sborder_7 = Border(0,120,100,120,BLACK)
 
 sborders = [sborder_1,sborder_2,sborder_3,sborder_4,sborder_5,sborder_6,sborder_7]
 
-
-
 #regions
 North = Region("North",1,0,30,0,120)
-Temperate1 = Region("Temperate",1,0,30,121,240)
-Tropical1 = Region("Tropical",1,0,30,241,300)
-Tropical2 = Region("Tropical",1,0,30,301,360)
-Temperate2 = Region("Temperate",1,0,30,361,480)
+Temperate_north = Region("Temperate_north",1,0,30,121,240)
+Tropical_north = Region("Tropical_north",1,0,30,241,300)
+Tropical_south = Region("Tropical_south",1,0,30,301,360)
+Temperate_south = Region("Temperate_south",1,0,30,361,480)
 South = Region("South",1,0,30,481,600)
 
-regions = [North,Temperate1,Temperate2,Tropical1,Tropical2,South]
+regions = [North,Temperate_north,Temperate_south,Tropical_north,Tropical_south,South]
+
+#seasons dictionary with month as key and temperatures as min/max values in a list
+
+seasons_north = {"January":(-30,-15),"February":(-25,-10),"March":(-15,-5), "April":(-7,3),"May":(0,8),"June":(5,12),"July":(10,15),"August":(7,12),"September":(0,7),"October":(-7,3),"November":(-15,-7),"December":(-25,-15)}
+seasons_temperate_north = {"January":(-5,8),"February":(0,12),"March":(5,15), "April":(10,18),"May":(15,23),"June":(18,27),"July":(24,30),"August":(20,27),"September":(15,23),"October":(10,18),"November":(5,12),"December":(0,10)}
+seasons_tropical_north = {"January":(-30,-15),"February":(-25,-10),"March":(-15,-5), "April":(-7,3),"May":(0,8),"June":(5,12),"July":(10,15),"August":(7,12),"September":(0,7),"October":(-7,3),"November":(-15,-7),"December":(-25,-15)}
+seasons_tropical_south = {"January":(-30,-15),"February":(-25,-10),"March":(-15,-5), "April":(-7,3),"May":(0,8),"June":(5,12),"July":(10,15),"August":(7,12),"September":(0,7),"October":(-7,3),"November":(-15,-7),"December":(-25,-15)}
+seasons_temperate_south = {"January":(-30,-15),"February":(-25,-10),"March":(-15,-5), "April":(-7,3),"May":(0,8),"June":(5,12),"July":(10,15),"August":(7,12),"September":(0,7),"October":(-7,3),"November":(-15,-7),"December":(-25,-15)}
+seasons_south = {"January":(-30,-15),"February":(-25,-10),"March":(-15,-5), "April":(-7,3),"May":(0,8),"June":(5,12),"July":(10,15),"August":(7,12),"September":(0,7),"October":(-7,3),"November":(-15,-7),"December":(-25,-15)}
 
 #Game Loop
 running = True
@@ -351,17 +402,21 @@ while running:
             sys.exit(0)
 
     display.draw()
+
     for border in borders:
         border.draw_dotted()
     for sborder in sborders:
         sborder.draw()
-    for region in regions:
-        region.draw_display()
+
     clock.tick(5)
-    pygame.display.flip()
+
     if start_button.start_click():
         run_simulation = True
 
     if run_simulation:
+        for region in regions:
+            region.draw_display()
         date += date_change
+
+    pygame.display.flip()
 
