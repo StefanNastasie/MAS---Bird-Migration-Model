@@ -1,5 +1,6 @@
-import pygame, math, sys, datetime
+import pygame, math, sys, datetime, numpy
 from random import randint
+
 
 
 pygame.init()
@@ -179,19 +180,30 @@ def new_number(agents):
 
 class Region():
 
-    def __init__(self, name, hemisphere, min_value, max_value, location):
+    def __init__(self, name, hemisphere, min_value, max_value, yleft, yright):
         self.name = name #name of the temp region
         self.hemisphere = hemisphere #hemisphere bool
         self.min_value = min_value #min value that the temp can reach
         self.max_value = max_value #max value that the temp can reach
-        self.location = location #location border on the screen
+        #location border on the screen
+        self.yleft = yleft
+        self.uleft = (0,yleft)
+        self.dright = (749,yright)
+        self.uright = (X,yleft)
+        self.dleft = (0,yright)
+        self.font = pygame.font.SysFont("White", 15)
+        self.color = WHITE
 
-
-    def temperature(self,date):
-        pass
+    def temperature(self,current_date):
+        return temperature
     #add methods
 
+    def draw_display(self):
 
+        region_info = self.font.render(str(self.name), 1, self.color)
+        temperature_info = self.font.render('Temperature:{}°C'.format(self.temperature(date)), 1, self.color)
+        screen.blit(region_info, (self.yleft+10, X+20))
+        screen.blit(temperature_info, (self.yleft+20, X+20))
 
 class display_info():
 
@@ -275,15 +287,6 @@ def draw_dashed_line(surf, color, start_pos, end_pos, width=1, dash_length=10):
 
 
 
-
-
-
-
-
-
-
-
-
 #some game properties
 
 screen = pygame.display.set_mode((X, Y))
@@ -296,7 +299,7 @@ date = datetime.date(2022,1,1)
 date_change = datetime.timedelta(days=1)
 display = display_info(X-120, 10)
 start_button = Button(X-120, 60,start_img,0.1)
-
+temperature = 10
 
 #region borders
 
@@ -322,6 +325,15 @@ sborders = [sborder_1,sborder_2,sborder_3,sborder_4,sborder_5,sborder_6,sborder_
 
 
 
+#regions
+North = Region("North",1,0,30,0,120)
+Temperate1 = Region("Temperate",1,0,30,121,240)
+Tropical1 = Region("Tropical",1,0,30,241,300)
+Tropical2 = Region("Tropical",1,0,30,301,360)
+Temperate2 = Region("Temperate",1,0,30,361,480)
+South = Region("South",1,0,30,481,600)
+
+regions = [North,Temperate1,Temperate2,Tropical1,Tropical2,South]
 
 #Game Loop
 running = True
@@ -332,21 +344,19 @@ while running:
     screen.fill(BBYBLUE)
     start_button.draw()
 
-
     for event in pygame.event.get():
         if event.type == pygame.QUIT:
             running = False
             pygame.quit()
             sys.exit(0)
 
-
-
     display.draw()
     for border in borders:
         border.draw_dotted()
     for sborder in sborders:
         sborder.draw()
-
+    for region in regions:
+        region.draw_display()
     clock.tick(5)
     pygame.display.flip()
     if start_button.start_click():
@@ -355,8 +365,3 @@ while running:
     if run_simulation:
         date += date_change
 
-    #reproduction loop needs to be added in game loop, but should only run once per tick
-    #for agent in agents:
-    #agents.remove(agent)
-    #agent.find_partner()
-    #agents.add(agent)
