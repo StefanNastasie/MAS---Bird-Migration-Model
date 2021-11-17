@@ -1,6 +1,6 @@
 import pygame, math, sys, datetime, numpy
 from random import randint
-
+from pygame.locals import RLEACCEL
 
 
 pygame.init()
@@ -120,13 +120,14 @@ class Agent(pygame.sprite.Sprite):
         self.speed = [2,2]
         self.time_alive = 0
         self.image = pygame.image.load("arrow-pointer.png")
-        self.image = pygame.transform.scale(self.image, (20, 20))
+        self.image = pygame.transform.scale(self.image, (18, 18))
         self.rect = self.image.get_rect()
         self.rect.x = init_pos[0]
         self.rect.y = init_pos[1]
         self.image.set_colorkey(BBYBLUE, RLEACCEL)
         self.partner = 0
-        self.cooldown = 20
+        self.cooldown = 0
+        self.goal = [self.rect.x, self.rect.y]
 
     def find_partner(self):
         if pygame.sprite.spritecollide(self, agents, False):
@@ -136,15 +137,17 @@ class Agent(pygame.sprite.Sprite):
             else:
                 self.cooldown -= 1
 
+
     def move(self):
-        goal = self.goal()
-        if (self.rect.x - goal[0]) > 5:
+        if abs(self.rect.x - self.goal[0]) <= 5 and abs(self.rect.y - self.goal[1]) <= 5: 
+            self.find_goal()
+        if (self.rect.x - self.goal[0]) > 5:
             self.rect.x -= self.speed[0]
-        if (self.rect.x - goal[0]) < -5:
+        if (self.rect.x - self.goal[0]) < -5:
             self.rect.x += self.speed[0]
-        if (self.rect.y - goal[1]) > 5:
+        if (self.rect.y - self.goal[1]) > 5:
             self.rect.y -= self.speed[1]
-        if (self.rect.y - goal[1]) < -5:
+        if (self.rect.y - self.goal[1]) < -5:
             self.rect.y += self.speed[1]
 
     def update(self):
@@ -166,12 +169,11 @@ class Agent(pygame.sprite.Sprite):
             self.cooldown = 20
 
 
-    def goal(self):
+    def find_goal(self):
         if self.summer():
-            x_goal = self.rect.x + randint(-10, 10)
-            y_goal = self.rect.y + randint(-10, 10)
-            goal = [x_goal, y_goal]
-            return goal
+            x_goal = randint(100, 750)
+            y_goal = randint(0, 600)
+            self.goal = [x_goal, y_goal]
         if not self.summer():
             pass
 
@@ -401,8 +403,8 @@ running = True
 run_simulation = False
 
 #for testing
-for i in range(10):
-    Agent([randint(0,900),randint(0,600)], new_number(), BLACK)
+for i in range(25):
+    Agent([randint(100,750),randint(0,600)], new_number(), BLACK)
 
 while running:
 
@@ -424,9 +426,10 @@ while running:
     for agent in agents:
         agent.update()
         screen.blit(agent.image, agent.rect)
-        agents.remove(agent)
-        agent.find_partner()
-        agents.add(agent)
+        if agent.alive():
+            agents.remove(agent)
+            agent.find_partner()
+            agents.add(agent)
 
     clock.tick(5)
 
@@ -439,4 +442,3 @@ while running:
         date += date_change
 
     pygame.display.flip()
-
