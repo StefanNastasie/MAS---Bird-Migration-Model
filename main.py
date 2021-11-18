@@ -1,6 +1,6 @@
 import pygame, math, sys, datetime, numpy
 from random import randint
-from pygame.locals import RLEACCEL
+from pygame.locals import *
 
 
 pygame.init()
@@ -119,7 +119,7 @@ class Agent(pygame.sprite.Sprite):
         self.number = number
         self.speed = [2,2]
         self.time_alive = 0
-        self.image = pygame.image.load("arrow-pointer.png")
+        self.image = pygame.image.load("new-pointer.png")
         self.image = pygame.transform.scale(self.image, (18, 18))
         self.rect = self.image.get_rect()
         self.rect.x = init_pos[0]
@@ -128,6 +128,9 @@ class Agent(pygame.sprite.Sprite):
         self.partner = 0
         self.cooldown = 0
         self.goal = [self.rect.x, self.rect.y]
+        colorImage = pygame.Surface(self.image.get_size()).convert_alpha()
+        colorImage.fill(color)
+        self.image.blit(colorImage, (0,0), special_flags = pygame.BLEND_RGBA_MULT)
 
     def find_partner(self):
         if pygame.sprite.spritecollide(self, agents, False):
@@ -421,7 +424,7 @@ run_simulation = False
 
 #for testing
 for i in range(25):
-    Agent([randint(100,750),randint(0,600)], new_number(), BLACK)
+    Agent([randint(100,750),randint(0,600)], new_number(), MAGENTA)
 
 while running:
 
