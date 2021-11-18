@@ -1,6 +1,6 @@
 import pygame, math, sys, datetime, numpy
 from random import randint
-from pygame.locals import *
+from pygame.locals import RLEACCEL
 
 
 pygame.init()
@@ -56,9 +56,9 @@ class Slider():
         self.val = int(val)  # start value
         self.maxi = maxi  # maximum at slider position right
         self.mini = mini  # minimum at slider position left
-        self.xpos = pos  # x-location on screen
-        self.ypos = 550 # fixed y-location at the bottom of the screen
-        self.surf = pygame.surface.Surface((100, 50)) # dimensions for the slider box
+        self.xpos = 780  # fixed x-location on the left of the screen
+        self.ypos = pos  # y-position
+        self.surf = pygame.surface.Surface((100, 50))  # dimensions for the slider box
         self.hit = False  # attribute that registers mouse interaction
 
         self.txt_surf = font.render(name, 1, BLACK)
@@ -119,8 +119,8 @@ class Agent(pygame.sprite.Sprite):
         self.number = number
         self.speed = [2,2]
         self.time_alive = 0
-        self.image = pygame.image.load("new-pointer.png")
-        self.image = pygame.transform.scale(self.image, (25, 25))
+        self.image = pygame.image.load("arrow-pointer.png")
+        self.image = pygame.transform.scale(self.image, (18, 18))
         self.rect = self.image.get_rect()
         self.rect.x = init_pos[0]
         self.rect.y = init_pos[1]
@@ -128,9 +128,6 @@ class Agent(pygame.sprite.Sprite):
         self.partner = 0
         self.cooldown = 0
         self.goal = [self.rect.x, self.rect.y]
-        colorImage = pygame.Surface(self.image.get_size()).convert_alpha()
-        colorImage.fill(color)
-        self.image.blit(colorImage, (0,0), special_flags = pygame.BLEND_RGBA_MULT)
 
     def find_partner(self):
         if pygame.sprite.spritecollide(self, agents, False):
@@ -142,7 +139,7 @@ class Agent(pygame.sprite.Sprite):
 
 
     def move(self):
-        if abs(self.rect.x - self.goal[0]) <= 5 and abs(self.rect.y - self.goal[1]) <= 5: 
+        if abs(self.rect.x - self.goal[0]) <= 5 and abs(self.rect.y - self.goal[1]) <= 5:
             self.find_goal()
         if (self.rect.x - self.goal[0]) > 5:
             self.rect.x -= self.speed[0]
@@ -274,7 +271,7 @@ class display_info():
     def draw(self):
 
         date_info = self.font.render(str(date), 1, self.color)
-        population_info = self.font.render('population:{}'.format(population_counter), 1, self.color)
+        population_info = self.font.render('population:{}'.format(Pop.val), 1, self.color)
         screen.blit(date_info, (self.xpos, self.ypos+25))
         screen.blit(population_info, (self.xpos, self.ypos))
 
@@ -348,17 +345,20 @@ def number_to_month(month_number):
 
 #some game properties
 
+
+font = pygame.font.SysFont("Verdana", 8)
 screen = pygame.display.set_mode((X, Y))
 clock = pygame.time.Clock()
 pygame.display.set_caption("Bird Migration Model")
 icon = pygame.image.load('bird.png')
 pygame.display.set_icon(icon)
-population_counter = 10
 date = datetime.date(2022,1,1)
 date_change = datetime.timedelta(days=1)
 display = display_info(X-120, 10)
 start_button = Button(X-120, 60,start_img,0.1)
 climate_factor = 0
+
+
 
 #region borders
 
@@ -401,13 +401,27 @@ seasons_tropical_south = {"January":(-30,-15),"February":(-25,-10),"March":(-15,
 seasons_temperate_south = {"January":(-30,-15),"February":(-25,-10),"March":(-15,-5), "April":(-7,3),"May":(0,8),"June":(5,12),"July":(10,15),"August":(7,12),"September":(0,7),"October":(-7,3),"November":(-15,-7),"December":(-25,-15)}
 seasons_south = {"January":(-30,-15),"February":(-25,-10),"March":(-15,-5), "April":(-7,3),"May":(0,8),"June":(5,12),"July":(10,15),"August":(7,12),"September":(0,7),"October":(-7,3),"November":(-15,-7),"December":(-25,-15)}
 
+
+#sliders
+
+Pop = Slider("Population", 2, 500, 2, 150)
+Speed = Slider("Speed", 5, 50, 5, 220)
+Reproduction_rate = Slider("Reproduction rate", 1, 75, 0, 290)
+Death_rate = Slider("Death rate", 1, 10, 1, 360)
+
+sliders = [Pop, Speed, Reproduction_rate, Death_rate]
+
+
+#lock sliders after start (except speed)
+
+
 #Game Loop
 running = True
 run_simulation = False
 
 #for testing
 for i in range(25):
-    Agent([randint(100,750),randint(0,600)], new_number(), MAGENTA)
+    Agent([randint(100,750),randint(0,600)], new_number(), BLACK)
 
 while running:
 
@@ -420,21 +434,30 @@ while running:
             pygame.quit()
             sys.exit(0)
 
+        elif event.type == pygame.MOUSEBUTTONDOWN:
+            pos = pygame.mouse.get_pos()
+            for slider in sliders:
+                if slider.button_rect.collidepoint(pos):
+                    slider.hit = True
+        elif event.type == pygame.MOUSEBUTTONUP:
+            for slider in sliders:
+                slider.hit = False
+
+    for slider in sliders:
+        slider.draw()
+
     display.draw()
+    pos = pygame.mouse.get_pos()
+
+
 
     for border in borders:
         border.draw_dotted()
     for sborder in sborders:
         sborder.draw()
-    for agent in agents:
-        agent.update()
-        screen.blit(agent.image, agent.rect)
-        if agent.alive():
-            agents.remove(agent)
-            agent.find_partner()
-            agents.add(agent)
 
-    clock.tick(5)
+
+
 
     if start_button.start_click():
         run_simulation = True
@@ -442,6 +465,18 @@ while running:
     if run_simulation:
         for region in regions:
             region.draw_display()
+        for agent in agents:
+            agent.update()
+            screen.blit(agent.image, agent.rect)
+            if agent.alive():
+                agents.remove(agent)
+                agent.find_partner()
+                agents.add(agent)
         date += date_change
 
+        for slider in sliders:
+            if slider.hit:
+                slider.move()
+
+    clock.tick(Speed.val)
     pygame.display.flip()
