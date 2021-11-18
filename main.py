@@ -135,7 +135,7 @@ class Agent(pygame.sprite.Sprite):
     def find_partner(self):
         if pygame.sprite.spritecollide(self, agents, False):
             if self.cooldown <= 0:
-                if randint(0, 101) < 2:
+                if randint(0, 101) < 5:
                     self.partner = 1
             else:
                 self.cooldown -= 1
@@ -160,8 +160,8 @@ class Agent(pygame.sprite.Sprite):
         self.reproduction()
 
     def check_death(self):
-        if self.time_alive > 180:
-            if randint(0,101) < 5:
+        if self.time_alive > 40:
+            if randint(0,101) < 2:
                 self.kill()
 
 
@@ -169,7 +169,7 @@ class Agent(pygame.sprite.Sprite):
         if self.partner != 0:
             Agent([self.rect.x + randint(-100, 100), self.rect.y + randint(-100, 100)], new_number(), BLACK)
             self.partner = 0
-            self.cooldown = 20
+            self.cooldown = 15
 
 
     def find_goal(self):
@@ -272,9 +272,11 @@ class display_info():
         self.color = MAGENTA
 
     def draw(self):
-
+        current_pop = len(agents)
+        if not run_simulation:
+            current_pop = Pop.val
         date_info = self.font.render(str(date), 1, self.color)
-        population_info = self.font.render('population:{}'.format(Pop.val), 1, self.color)
+        population_info = self.font.render('population:{}'.format(current_pop), 1, self.color)
         screen.blit(date_info, (self.xpos, self.ypos+25))
         screen.blit(population_info, (self.xpos, self.ypos))
 
@@ -363,6 +365,7 @@ climate_factor = 0
 
 
 
+
 #region borders
 
 border_1 = Border(100,480,760,480,RED)
@@ -407,13 +410,12 @@ seasons_south = {"January":(-30,-15),"February":(-25,-10),"March":(-15,-5), "Apr
 
 #sliders
 
-Pop = Slider("Population", 2, 500, 2, 150)
+Pop = Slider("Population", 2, 100, 2, 150)
 Speed = Slider("Speed", 5, 50, 5, 220)
 Reproduction_rate = Slider("Reproduction rate", 1, 75, 0, 290)
 Death_rate = Slider("Death rate", 1, 10, 1, 360)
 
 sliders = [Pop, Speed, Reproduction_rate, Death_rate]
-
 
 #lock sliders after start (except speed)
 
@@ -421,10 +423,6 @@ sliders = [Pop, Speed, Reproduction_rate, Death_rate]
 #Game Loop
 running = True
 run_simulation = False
-
-#for testing
-for i in range(25):
-    Agent([randint(100,750),randint(0,600)], new_number(), MAGENTA)
 
 while running:
 
@@ -468,6 +466,8 @@ while running:
 
     if start_button.start_click():
         run_simulation = True
+        for i in range(Pop.val):
+            Agent([randint(100,750),randint(0,600)], new_number(), MAGENTA)
 
     if run_simulation:
         for region in regions:
@@ -480,6 +480,7 @@ while running:
                 agent.find_partner()
                 agents.add(agent)
         date += date_change
+        current_pop = len(agents)
 
         if Speed.hit:
             Speed.move()
