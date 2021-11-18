@@ -456,6 +456,10 @@ while running:
     for sborder in sborders:
         sborder.draw()
 
+    if run_simulation == False:
+        for slider in sliders:
+            if slider.hit:
+                slider.move()
 
 
 
@@ -474,9 +478,8 @@ while running:
                 agents.add(agent)
         date += date_change
 
-        for slider in sliders:
-            if slider.hit:
-                slider.move()
+        if Speed.hit:
+            Speed.move()
 
     clock.tick(Speed.val)
     pygame.display.flip()
