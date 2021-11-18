@@ -10,7 +10,7 @@ pygame.font.init()
 
 X = 900
 Y = 600
-
+screen = pygame.display.set_mode((X, Y))
 #set color values for easier access
 
 WHITE = (255, 255, 255)
@@ -110,6 +110,8 @@ class Slider():
 
 #Agent class
 
+bird = pygame.image.load("new-pointer.png").convert_alpha()
+
 agents = pygame.sprite.Group()
 #add all agents to a sprite group for easy iteration
 
@@ -119,8 +121,8 @@ class Agent(pygame.sprite.Sprite):
         self.number = number
         self.speed = [2,2]
         self.time_alive = 0
-        self.image = pygame.image.load("new-pointer.png")
-        self.image = pygame.transform.scale(self.image, (18, 18))
+        self.image = bird
+        self.image = pygame.transform.scale(self.image, (30, 30))
         self.rect = self.image.get_rect()
         self.rect.x = init_pos[0]
         self.rect.y = init_pos[1]
@@ -209,48 +211,48 @@ class Region():
         self.font = pygame.font.SysFont("Magenta", 15)
         self.color = MAGENTA
 
-    def temperature(self, current_date):
+    def temperature(self, current_date, climate_factor):
         if self.name == "North":
             month = current_date.month
             temp_values = seasons_north.values()
             temp_values_list = list(temp_values)
             temp_range = temp_values_list[month-1]
-            return randint(temp_range[0],temp_range[1])
+            return randint(temp_range[0] - climate_factor, temp_range[1] + climate_factor)
 
         if self.name == "Temperate_north":
             month = current_date.month
             temp_values = seasons_temperate_north.values()
             temp_values_list = list(temp_values)
             temp_range = temp_values_list[month-1]
-            return randint(temp_range[0],temp_range[1])
+            return randint(temp_range[0] - climate_factor, temp_range[1] + climate_factor)
 
         if self.name == "Tropical_north":
             month = current_date.month
             temp_values = seasons_tropical_north.values()
             temp_values_list = list(temp_values)
             temp_range = temp_values_list[month-1]
-            return randint(temp_range[0],temp_range[1])
+            return randint(temp_range[0] - climate_factor, temp_range[1] + climate_factor)
 
         if self.name == "Tropical_south":
             month = current_date.month
             temp_values = seasons_tropical_south.values()
             temp_values_list = list(temp_values)
             temp_range = temp_values_list[month-1]
-            return randint(temp_range[0],temp_range[1])
+            return randint(temp_range[0] - climate_factor, temp_range[1] + climate_factor)
 
         if self.name == "Temperate_south":
             month = current_date.month
             temp_values = seasons_temperate_south.values()
             temp_values_list = list(temp_values)
             temp_range = temp_values_list[month-1]
-            return randint(temp_range[0],temp_range[1])
+            return randint(temp_range[0] - climate_factor, temp_range[1] + climate_factor)
 
         if self.name == "South":
             month = current_date.month
             temp_values = seasons_south.values()
             temp_values_list = list(temp_values)
             temp_range = temp_values_list[month-1]
-            return randint(temp_range[0],temp_range[1])
+            return randint(temp_range[0] - climate_factor, temp_range[1] + climate_factor)
 
 
 
@@ -259,7 +261,7 @@ class Region():
     def draw_display(self):
 
         region_info = self.font.render(str(self.name), 1, self.color)
-        temperature_info = self.font.render('Temperature:{}°C'.format(self.temperature(date)), 1, self.color)
+        temperature_info = self.font.render('Temperature:{}°C'.format(self.temperature(date, Climate_change_factor.val)), 1, self.color)
         screen.blit(region_info, (5,self.yleft+10))
         screen.blit(temperature_info, (5,self.yleft+20))
 
@@ -281,7 +283,7 @@ class display_info():
         screen.blit(population_info, (self.xpos, self.ypos))
 
 
-start_img = pygame.image.load('play.png')
+start_img = pygame.image.load('play.png').convert_alpha()
 
 class Button():
     def __init__(self,x,y,image,scale):
@@ -352,16 +354,15 @@ def number_to_month(month_number):
 
 
 font = pygame.font.SysFont("Verdana", 8)
-screen = pygame.display.set_mode((X, Y))
 clock = pygame.time.Clock()
 pygame.display.set_caption("Bird Migration Model")
-icon = pygame.image.load('bird.png')
+icon = pygame.image.load('bird.png').convert_alpha()
 pygame.display.set_icon(icon)
 date = datetime.date(2022,1,1)
 date_change = datetime.timedelta(days=1)
 display = display_info(X-120, 10)
 start_button = Button(X-120, 60,start_img,0.1)
-climate_factor = 0
+
 
 
 
@@ -414,8 +415,9 @@ Pop = Slider("Population", 2, 100, 2, 150)
 Speed = Slider("Speed", 5, 50, 5, 220)
 Reproduction_rate = Slider("Reproduction rate", 1, 75, 0, 290)
 Death_rate = Slider("Death rate", 1, 10, 1, 360)
+Climate_change_factor = Slider("Climate factor", 0, 20, 0, 430)
 
-sliders = [Pop, Speed, Reproduction_rate, Death_rate]
+sliders = [Pop, Speed, Reproduction_rate, Death_rate, Climate_change_factor]
 
 #lock sliders after start (except speed)
 
