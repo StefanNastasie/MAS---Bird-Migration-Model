@@ -1,17 +1,18 @@
-import pygame, math, sys, datetime, numpy
+import pygame, math, sys, datetime
 from random import randint
-from pygame.locals import *
-
+from pygame.locals import RLEACCEL, BLEND_RGBA_MULT
+import matplotlib.pyplot as plt
+import numpy as np
 
 pygame.init()
 pygame.font.init()
 
-#set values for screen size
+# set values for screen size
 
 X = 900
 Y = 600
 screen = pygame.display.set_mode((X, Y))
-#set color values for easier access
+# set color values for easier access
 
 WHITE = (255, 255, 255)
 BLACK = (0, 0, 0)
@@ -24,9 +25,10 @@ ORANGE = (200, 100, 50)
 CYAN = (0, 255, 255)
 MAGENTA = (255, 0, 255)
 TRANS = (1, 1, 1)
-BBYBLUE = (202,228,241)
+BBYBLUE = (202, 228, 241)
 
-#class i found on the internet, might help us change background
+
+# class i found on the internet, might help us change background
 
 class Gradient():
     def __init__(self, palette, maximum):
@@ -42,13 +44,14 @@ class Gradient():
         i = x // self.SECTION
         fraction = (x % self.SECTION) / self.SECTION
         c1 = self.COLORS[i % self.N]
-        c2 = self.COLORS[(i+1) % self.N]
+        c2 = self.COLORS[(i + 1) % self.N]
         col = [0, 0, 0]
         for k in range(3):
             col[k] = (c2[k] - c1[k]) * fraction + c1[k]
         return col
 
-#class for the parameter sliders
+
+# class for the parameter sliders
 
 class Slider():
     def __init__(self, name, val, maxi, mini, pos):
@@ -79,7 +82,6 @@ class Slider():
         pygame.draw.circle(self.button_surf, BLACK, (10, 10), 6, 0)
         pygame.draw.circle(self.button_surf, CYAN, (10, 10), 4, 0)
 
-
     def draw(self):
         """ Combination of static and dynamic graphics in a copy of
     the basic slide surface
@@ -88,7 +90,7 @@ class Slider():
         surf = self.surf.copy()
 
         # dynamic
-        pos = (10+int((self.val-self.mini)/(self.maxi-self.mini)*80), 33)
+        pos = (10 + int((self.val - self.mini) / (self.maxi - self.mini) * 80), 33)
         self.button_rect = self.button_surf.get_rect(center=pos)
         surf.blit(self.button_surf, self.button_rect)
         self.button_rect.move_ip(self.xpos, self.ypos)  # move of button box to correct screen position
@@ -107,19 +109,20 @@ class Slider():
             self.val = self.maxi
 
 
-
-#Agent class
+# Agent class
 
 bird = pygame.image.load("new-pointer.png").convert_alpha()
 
 agents = pygame.sprite.Group()
-#add all agents to a sprite group for easy iteration
+
+
+# add all agents to a sprite group for easy iteration
 
 class Agent(pygame.sprite.Sprite):
     def __init__(self, init_pos, number, color):
         pygame.sprite.Sprite.__init__(self, agents)
         self.number = number
-        self.speed = [2,2]
+        self.speed = [2, 2]
         self.time_alive = 0
         self.image = bird
         self.image = pygame.transform.scale(self.image, (30, 30))
@@ -132,7 +135,7 @@ class Agent(pygame.sprite.Sprite):
         self.goal = [self.rect.x, self.rect.y]
         colorImage = pygame.Surface(self.image.get_size()).convert_alpha()
         colorImage.fill(color)
-        self.image.blit(colorImage, (0,0), special_flags = pygame.BLEND_RGBA_MULT)
+        self.image.blit(colorImage, (0, 0), special_flags=pygame.BLEND_RGBA_MULT)
 
     def find_partner(self):
         if pygame.sprite.spritecollide(self, agents, False):
@@ -141,7 +144,6 @@ class Agent(pygame.sprite.Sprite):
                     self.partner = 1
             else:
                 self.cooldown -= 1
-
 
     def move(self):
         if abs(self.rect.x - self.goal[0]) <= 5 and abs(self.rect.y - self.goal[1]) <= 5:
@@ -163,16 +165,14 @@ class Agent(pygame.sprite.Sprite):
 
     def check_death(self):
         if self.time_alive > 40:
-            if randint(0,101) < 2:
+            if randint(0, 101) < 2:
                 self.kill()
-
 
     def reproduction(self):
         if self.partner != 0:
             Agent([self.rect.x + randint(-100, 100), self.rect.y + randint(-100, 100)], new_number(), BLACK)
             self.partner = 0
             self.cooldown = 15
-
 
     def find_goal(self):
         if self.summer():
@@ -182,10 +182,10 @@ class Agent(pygame.sprite.Sprite):
         if not self.summer():
             pass
 
-
     def summer(self):
-        #returns true if temperature at current position is over a ceratin value
+        # returns true if temperature at current position is over a ceratin value
         return True
+
 
 def new_number():
     nums = []
@@ -195,19 +195,20 @@ def new_number():
         nums.append(i.number)
     return (max(nums) + 1)
 
+
 class Region():
 
     def __init__(self, name, hemisphere, min_value, max_value, yleft, yright):
-        self.name = name #name of the temp region
-        self.hemisphere = hemisphere #hemisphere bool
-        self.min_value = min_value #min value that the temp can reach
-        self.max_value = max_value #max value that the temp can reach
-        #location border on the screen
+        self.name = name  # name of the temp region
+        self.hemisphere = hemisphere  # hemisphere bool
+        self.min_value = min_value  # min value that the temp can reach
+        self.max_value = max_value  # max value that the temp can reach
+        # location border on the screen
         self.yleft = yleft
-        self.uleft = (0,yleft)
-        self.dright = (749,yright)
-        self.uright = (749,yleft)
-        self.dleft = (0,yright)
+        self.uleft = (0, yleft)
+        self.dright = (749, yright)
+        self.uright = (749, yleft)
+        self.dleft = (0, yright)
         self.font = pygame.font.SysFont("Magenta", 15)
         self.color = MAGENTA
 
@@ -216,54 +217,54 @@ class Region():
             month = current_date.month
             temp_values = seasons_north.values()
             temp_values_list = list(temp_values)
-            temp_range = temp_values_list[month-1]
+            temp_range = temp_values_list[month - 1]
             return randint(temp_range[0] - climate_factor, temp_range[1] + climate_factor)
 
         if self.name == "Temperate_north":
             month = current_date.month
             temp_values = seasons_temperate_north.values()
             temp_values_list = list(temp_values)
-            temp_range = temp_values_list[month-1]
+            temp_range = temp_values_list[month - 1]
             return randint(temp_range[0] - climate_factor, temp_range[1] + climate_factor)
 
         if self.name == "Tropical_north":
             month = current_date.month
             temp_values = seasons_tropical_north.values()
             temp_values_list = list(temp_values)
-            temp_range = temp_values_list[month-1]
+            temp_range = temp_values_list[month - 1]
             return randint(temp_range[0] - climate_factor, temp_range[1] + climate_factor)
 
         if self.name == "Tropical_south":
             month = current_date.month
             temp_values = seasons_tropical_south.values()
             temp_values_list = list(temp_values)
-            temp_range = temp_values_list[month-1]
+            temp_range = temp_values_list[month - 1]
             return randint(temp_range[0] - climate_factor, temp_range[1] + climate_factor)
 
         if self.name == "Temperate_south":
             month = current_date.month
             temp_values = seasons_temperate_south.values()
             temp_values_list = list(temp_values)
-            temp_range = temp_values_list[month-1]
+            temp_range = temp_values_list[month - 1]
             return randint(temp_range[0] - climate_factor, temp_range[1] + climate_factor)
 
         if self.name == "South":
             month = current_date.month
             temp_values = seasons_south.values()
             temp_values_list = list(temp_values)
-            temp_range = temp_values_list[month-1]
+            temp_range = temp_values_list[month - 1]
             return randint(temp_range[0] - climate_factor, temp_range[1] + climate_factor)
 
-
-
-    #add methods
+    # add methods
 
     def draw_display(self):
 
         region_info = self.font.render(str(self.name), 1, self.color)
-        temperature_info = self.font.render('Temperature:{}°C'.format(self.temperature(date, Climate_change_factor.val)), 1, self.color)
-        screen.blit(region_info, (5,self.yleft+10))
-        screen.blit(temperature_info, (5,self.yleft+20))
+        temperature_info = self.font.render(
+            'Temperature:{}°C'.format(self.temperature(date, Climate_change_factor.val)), 1, self.color)
+        screen.blit(region_info, (5, self.yleft + 10))
+        screen.blit(temperature_info, (5, self.yleft + 20))
+
 
 class display_info():
 
@@ -279,23 +280,24 @@ class display_info():
             current_pop = Pop.val
         date_info = self.font.render(str(date), 1, self.color)
         population_info = self.font.render('population:{}'.format(current_pop), 1, self.color)
-        screen.blit(date_info, (self.xpos, self.ypos+25))
+        screen.blit(date_info, (self.xpos, self.ypos + 25))
         screen.blit(population_info, (self.xpos, self.ypos))
 
 
 start_img = pygame.image.load('play.png').convert_alpha()
 
+
 class Button():
-    def __init__(self,x,y,image,scale):
+    def __init__(self, x, y, image, scale):
         width = image.get_width()
         height = image.get_height()
-        self.image = pygame.transform.scale(image,(int(width*scale),int(height*scale)))
+        self.image = pygame.transform.scale(image, (int(width * scale), int(height * scale)))
         self.circle = self.image.get_rect()
-        self.circle.topleft = (x,y)
+        self.circle.topleft = (x, y)
         self.clicked = False
 
     def draw(self):
-        screen.blit(self.image,(self.circle.x,self.circle.y))
+        screen.blit(self.image, (self.circle.x, self.circle.y))
 
     def start_click(self):
         pos = pygame.mouse.get_pos()
@@ -304,8 +306,9 @@ class Button():
                 self.clicked = True
                 return True
 
+
 class Border():
-    def __init__(self,xleft,yleft,xright,yright,color):
+    def __init__(self, xleft, yleft, xright, yright, color):
         self.xleft = xleft
         self.yleft = yleft
         self.xright = xright
@@ -313,10 +316,11 @@ class Border():
         self.color = color
 
     def draw_dotted(self):
-        draw_dashed_line(screen,self.color,(self.xleft,self.yleft),(self.xright,self.yright))
+        draw_dashed_line(screen, self.color, (self.xleft, self.yleft), (self.xright, self.yright))
 
     def draw(self):
-        pygame.draw.line(screen,self.color,(self.xleft,self.yleft),(self.xright,self.yright))
+        pygame.draw.line(screen, self.color, (self.xleft, self.yleft), (self.xright, self.yright))
+
 
 def draw_dashed_line(surf, color, start_pos, end_pos, width=1, dash_length=10):
     x1, y1 = start_pos
@@ -332,12 +336,12 @@ def draw_dashed_line(surf, color, start_pos, end_pos, width=1, dash_length=10):
     else:
         a = abs(x2 - x1)
         b = abs(y2 - y1)
-        c = round(math.sqrt(a**2 + b**2))
+        c = round(math.sqrt(a ** 2 + b ** 2))
         dx = dl * a / c
         dy = dl * b / c
 
-        xcoords = [x for x in numpy.arange(x1, x2, dx if x1 < x2 else -dx)]
-        ycoords = [y for y in numpy.arange(y1, y2, dy if y1 < y2 else -dy)]
+        xcoords = [x for x in np.arange(x1, x2, dx if x1 < x2 else -dx)]
+        ycoords = [y for y in np.arange(y1, y2, dy if y1 < y2 else -dy)]
 
     next_coords = list(zip(xcoords[1::2], ycoords[1::2]))
     last_coords = list(zip(xcoords[0::2], ycoords[0::2]))
@@ -346,11 +350,25 @@ def draw_dashed_line(surf, color, start_pos, end_pos, width=1, dash_length=10):
         end = (round(x2), round(y2))
         pygame.draw.line(surf, color, start, end, width)
 
-def number_to_month(month_number):
-    months = ["January","February","March","April","May","June","July","August","September","October","November","December"]
-    return months[month_number]-1
 
-#some game properties
+def number_to_month(month_number):
+    months = ["January", "February", "March", "April", "May", "June", "July", "August", "September", "October",
+              "November", "December"]
+    return months[month_number] - 1
+
+
+def plot_graph():
+    xaxis = np.array(days_passed)
+    yaxis = np.array(population_list)
+
+    plt.plot(xaxis, yaxis)
+    plt.title('Population graph by days passed')
+    plt.ylabel('Population')
+    plt.xlabel('Days passed')
+    plt.show()
+
+
+# some game properties
 
 
 font = pygame.font.SysFont("Verdana", 8)
@@ -358,71 +376,80 @@ clock = pygame.time.Clock()
 pygame.display.set_caption("Bird Migration Model")
 icon = pygame.image.load('bird.png').convert_alpha()
 pygame.display.set_icon(icon)
-date = datetime.date(2022,1,1)
+date = datetime.date(2022, 1, 1)
 date_change = datetime.timedelta(days=1)
-display = display_info(X-120, 10)
-start_button = Button(X-120, 60,start_img,0.1)
+display = display_info(X - 120, 10)
+start_button = Button(X - 120, 60, start_img, 0.1)
 
+# region borders
 
+border_1 = Border(100, 480, 760, 480, RED)
+border_2 = Border(100, 360, 760, 360, RED)
+border_3 = Border(100, 300, 760, 300, RED)
+border_4 = Border(100, 240, 760, 240, RED)
+border_5 = Border(100, 120, 760, 120, RED)
 
+borders = [border_1, border_2, border_3, border_4, border_5]
 
+# screen borders
 
-#region borders
+sborder_1 = Border(750, 0, 750, 600, BLACK)
+sborder_2 = Border(100, 0, 100, 600, BLACK)
+sborder_3 = Border(0, 480, 100, 480, BLACK)
+sborder_4 = Border(0, 360, 100, 360, BLACK)
+sborder_5 = Border(0, 300, 100, 300, BLACK)
+sborder_6 = Border(0, 240, 100, 240, BLACK)
+sborder_7 = Border(0, 120, 100, 120, BLACK)
 
-border_1 = Border(100,480,760,480,RED)
-border_2 = Border(100,360,760,360,RED)
-border_3 = Border(100,300,760,300,RED)
-border_4 = Border(100,240,760,240,RED)
-border_5 = Border(100,120,760,120,RED)
+sborders = [sborder_1, sborder_2, sborder_3, sborder_4, sborder_5, sborder_6, sborder_7]
 
-borders = [border_1,border_2,border_3,border_4,border_5]
+# regions
+North = Region("North", 1, 0, 30, 0, 120)
+Temperate_north = Region("Temperate_north", 1, 0, 30, 121, 240)
+Tropical_north = Region("Tropical_north", 1, 0, 30, 241, 300)
+Tropical_south = Region("Tropical_south", 1, 0, 30, 301, 360)
+Temperate_south = Region("Temperate_south", 1, 0, 30, 361, 480)
+South = Region("South", 1, 0, 30, 481, 600)
 
-#screen borders
+regions = [North, Temperate_north, Temperate_south, Tropical_north, Tropical_south, South]
 
-sborder_1 = Border(750,0,750,600,BLACK)
-sborder_2 = Border(100,0,100,600,BLACK)
-sborder_3 = Border(0,480,100,480,BLACK)
-sborder_4 = Border(0,360,100,360,BLACK)
-sborder_5 = Border(0,300,100,300,BLACK)
-sborder_6 = Border(0,240,100,240,BLACK)
-sborder_7 = Border(0,120,100,120,BLACK)
+# seasons dictionary with month as key and temperatures as min/max values in a tuple
 
-sborders = [sborder_1,sborder_2,sborder_3,sborder_4,sborder_5,sborder_6,sborder_7]
+seasons_north = {"January": (-12, -7), "February": (-13, -7), "March": (-11, -6), "April": (-7, 0), "May": (0, 6),
+                 "June": (5, 12), "July": (7, 14), "August": (6, 12), "September": (3, 8), "October": (-2, 2),
+                 "November": (-7, -3), "December": (-11, -6)}
+seasons_temperate_north = {"January": (0, 5), "February": (0, 6), "March": (1, 10), "April": (5, 15), "May": (10, 19),
+                           "June": (13, 23), "July": (16, 26), "August": (15, 24), "September": (12, 21),
+                           "October": (8, 16), "November": (4, 10), "December": (0, 6)}
+seasons_tropical_north = {"January": (19, 30), "February": (21, 32), "March": (23, 33), "April": (24, 35),
+                          "May": (26, 36), "June": (26, 36), "July": (25, 35), "August": (25, 34),
+                          "September": (25, 34), "October": (25, 34), "November": (22, 32), "December": (20, 30)}
+seasons_tropical_south = {"January": (21, 30), "February": (21, 30), "March": (21, 30), "April": (21, 30),
+                          "May": (19, 29), "June": (18, 28), "July": (17, 28), "August": (18, 29),
+                          "September": (19, 30), "October": (20, 30), "November": (21, 30), "December": (21, 30)}
+seasons_temperate_south = {"January": (12, 22), "February": (11, 22), "March": (10, 20), "April": (7, 18),
+                           "May": (5, 14), "June": (3, 12), "July": (2, 12), "August": (3, 13), "September": (4, 15),
+                           "October": (7, 17), "November": (8, 19), "December": (10, 21)}
+seasons_south = {"January": (-2, 3), "February": (-3, 2), "March": (-8, -1), "April": (-12, -5), "May": (-15, -7),
+                 "June": (-16, -8), "July": (-16, -8), "August": (-15, -7), "September": (-13, -6),
+                 "October": (-11, -4), "November": (-6, 0), "December": (-3, 2)}
 
-#regions
-North = Region("North",1,0,30,0,120)
-Temperate_north = Region("Temperate_north",1,0,30,121,240)
-Tropical_north = Region("Tropical_north",1,0,30,241,300)
-Tropical_south = Region("Tropical_south",1,0,30,301,360)
-Temperate_south = Region("Temperate_south",1,0,30,361,480)
-South = Region("South",1,0,30,481,600)
-
-regions = [North,Temperate_north,Temperate_south,Tropical_north,Tropical_south,South]
-
-#seasons dictionary with month as key and temperatures as min/max values in a list
-
-seasons_north = {"January":(-30,-15),"February":(-25,-10),"March":(-15,-5), "April":(-7,3),"May":(0,8),"June":(5,12),"July":(10,15),"August":(7,12),"September":(0,7),"October":(-7,3),"November":(-15,-7),"December":(-25,-15)}
-seasons_temperate_north = {"January":(-5,8),"February":(0,12),"March":(5,15), "April":(10,18),"May":(15,23),"June":(18,27),"July":(24,30),"August":(20,27),"September":(15,23),"October":(10,18),"November":(5,12),"December":(0,10)}
-seasons_tropical_north = {"January":(-30,-15),"February":(-25,-10),"March":(-15,-5), "April":(-7,3),"May":(0,8),"June":(5,12),"July":(10,15),"August":(7,12),"September":(0,7),"October":(-7,3),"November":(-15,-7),"December":(-25,-15)}
-seasons_tropical_south = {"January":(-30,-15),"February":(-25,-10),"March":(-15,-5), "April":(-7,3),"May":(0,8),"June":(5,12),"July":(10,15),"August":(7,12),"September":(0,7),"October":(-7,3),"November":(-15,-7),"December":(-25,-15)}
-seasons_temperate_south = {"January":(-30,-15),"February":(-25,-10),"March":(-15,-5), "April":(-7,3),"May":(0,8),"June":(5,12),"July":(10,15),"August":(7,12),"September":(0,7),"October":(-7,3),"November":(-15,-7),"December":(-25,-15)}
-seasons_south = {"January":(-30,-15),"February":(-25,-10),"March":(-15,-5), "April":(-7,3),"May":(0,8),"June":(5,12),"July":(10,15),"August":(7,12),"September":(0,7),"October":(-7,3),"November":(-15,-7),"December":(-25,-15)}
-
-
-#sliders
+# sliders
 
 Pop = Slider("Population", 2, 100, 2, 150)
-Speed = Slider("Speed", 5, 50, 5, 220)
+Speed = Slider("Speed", 25, 50, 10, 220)
 Reproduction_rate = Slider("Reproduction rate", 1, 75, 0, 290)
 Death_rate = Slider("Death rate", 1, 10, 1, 360)
 Climate_change_factor = Slider("Climate factor", 0, 20, 0, 430)
 
 sliders = [Pop, Speed, Reproduction_rate, Death_rate, Climate_change_factor]
 
-#lock sliders after start (except speed)
+# graph data
+days_passed = []
+population_list = []
+days_counter = 0
 
-
-#Game Loop
+# Game Loop
 running = True
 run_simulation = False
 
@@ -434,8 +461,9 @@ while running:
     for event in pygame.event.get():
         if event.type == pygame.QUIT:
             running = False
+            plot_graph()
             pygame.quit()
-            sys.exit(0)
+            sys.exit()
 
         elif event.type == pygame.MOUSEBUTTONDOWN:
             pos = pygame.mouse.get_pos()
@@ -452,24 +480,20 @@ while running:
     display.draw()
     pos = pygame.mouse.get_pos()
 
-
-
     for border in borders:
         border.draw_dotted()
     for sborder in sborders:
         sborder.draw()
 
-    if run_simulation == False:
+    if not run_simulation:
         for slider in sliders:
             if slider.hit:
                 slider.move()
 
-
-
     if start_button.start_click():
         run_simulation = True
         for i in range(Pop.val):
-            Agent([randint(100,750),randint(0,600)], new_number(), MAGENTA)
+            Agent([randint(100, 750), randint(0, 600)], new_number(), MAGENTA)
 
     if run_simulation:
         for region in regions:
@@ -482,7 +506,10 @@ while running:
                 agent.find_partner()
                 agents.add(agent)
         date += date_change
+        days_counter += 1
+        days_passed.append(days_counter)
         current_pop = len(agents)
+        population_list.append(current_pop)
 
         if Speed.hit:
             Speed.move()
