@@ -91,10 +91,8 @@ class Slider():
 
 bird = pygame.image.load("new-pointer.png").convert_alpha()
 
+# Create a pygame group of all agents to make iteration easy
 agents = pygame.sprite.Group()
-
-
-# add all agents to a sprite group for easy iteration
 
 class Agent(pygame.sprite.Sprite):
     def __init__(self, init_pos):
@@ -115,6 +113,7 @@ class Agent(pygame.sprite.Sprite):
         self.lives = 20
         self.region = ''
 
+    # Check if any two agents are colliding. If so, and enough time has passed, they create a new agent at their location
     def reproduction(self):
         if pygame.sprite.spritecollide(self, agents, False):
             if self.cooldown <= 0:
@@ -123,7 +122,8 @@ class Agent(pygame.sprite.Sprite):
                     self.cooldown = 360
             else:
                 self.cooldown -= 1
-
+                
+    # Get the agents current geographical region in order to get the agents current temperature
     def get_region(self):
         if self.rect.y > 480:
             self.region = South
@@ -137,7 +137,8 @@ class Agent(pygame.sprite.Sprite):
             self.region = Temperate_north
         else:
             self.region = North
-
+            
+    # If the agent is close to its goal, or if its at a critical temperature, it chooses a new goal and moves towards it.
     def move(self):
         if abs(self.rect.x - self.goal[0]) <= 5 and abs(self.rect.y - self.goal[1]) <= 5:
             self.find_goal()
@@ -152,14 +153,16 @@ class Agent(pygame.sprite.Sprite):
             self.rect.y -= self.speed[1]
         if (self.rect.y - self.goal[1]) < -5:
             self.rect.y += self.speed[1]
-
+            
+    # Update method containing all necessary methods for a tick
     def update(self):
         self.get_region()
         self.temperature = self.region.displayed_temp
         self.check_death()
         self.move()
         self.time_alive += 1
-
+        
+    # If the agent has been alive a certain amount of days or is at a critical temperature for a few days in succession it dies. The agent can regenerate at ideal temperatures.
     def check_death(self):
         if self.time_alive > Lifespan.val:
             self.kill()
@@ -169,7 +172,8 @@ class Agent(pygame.sprite.Sprite):
             self.lives += 1
         if self.lives <= 0:
             self.kill()
-
+            
+    # The agent chooses a random new goal. If its temperature is ideal the new choice is only limited to the agents hemisphere. If temperature is not ideal the choice is limited to warmer/colder regions.
     def find_goal(self):
         x_goal = randint(100, 740)
         if self.temperature < -5:
