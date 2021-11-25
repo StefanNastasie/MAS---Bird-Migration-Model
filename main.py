@@ -28,7 +28,6 @@ MAGENTA = (255, 0, 255)
 TRANS = (1, 1, 1)
 BBYBLUE = (202, 228, 241)
 
-
 # class for the parameter sliders
 
 class Slider():
@@ -166,12 +165,14 @@ class Agent(pygame.sprite.Sprite):
     def check_death(self):
         if self.time_alive > Lifespan.val:
             self.kill()
+            Deaths.natural += 1
         if self.temperature < -5 or self.temperature > 40:
             self.lives -= 1
         if self.temperature > 15 and self.temperature < 25 and self.lives < 15:
             self.lives += 1
         if self.lives <= 0:
             self.kill()
+            Deaths.temp += 1
             
     # The agent chooses a random new goal. If its temperature is ideal the new choice is only limited to the agents hemisphere. If temperature is not ideal the choice is limited to warmer/colder regions.
     def find_goal(self):
@@ -193,6 +194,11 @@ class Agent(pygame.sprite.Sprite):
                 y_goal = randint(0, 300)
         self.goal = [x_goal, y_goal]
 
+# To track the natural vs temperature related deaths for the chart
+class Deaths():
+    def __init__(self, temp, natural):
+        self.temp = 0
+        self.natural = 0
 
 class Region():
 
@@ -452,6 +458,9 @@ date = datetime.date(2022, 1, 1)
 date_change = datetime.timedelta(days=1)
 display = display_info(X - 120, 10)
 start_button = Button(X - 120, 60, start_img, 0.1)
+
+#Death counter for chart
+Deaths = Deaths(0,0)
 
 # region borders
 
