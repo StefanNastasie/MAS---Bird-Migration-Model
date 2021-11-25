@@ -12,6 +12,7 @@ pygame.font.init()
 X = 900
 Y = 600
 screen = pygame.display.set_mode((X, Y))
+
 # set color values for easier access
 
 WHITE = (255, 255, 255)
@@ -26,29 +27,6 @@ CYAN = (0, 255, 255)
 MAGENTA = (255, 0, 255)
 TRANS = (1, 1, 1)
 BBYBLUE = (202, 228, 241)
-
-
-# class i found on the internet, might help us change background
-
-class Gradient():
-    def __init__(self, palette, maximum):
-        self.COLORS = palette
-        self.N = len(self.COLORS)
-        self.SECTION = maximum // (self.N - 1)
-
-    def gradient(self, x):
-        """
-        Returns a smooth color profile with only a single input value.
-        The color scheme is determined by the list 'self.COLORS'
-        """
-        i = x // self.SECTION
-        fraction = (x % self.SECTION) / self.SECTION
-        c1 = self.COLORS[i % self.N]
-        c2 = self.COLORS[(i + 1) % self.N]
-        col = [0, 0, 0]
-        for k in range(3):
-            col[k] = (c2[k] - c1[k]) * fraction + c1[k]
-        return col
 
 
 # class for the parameter sliders
@@ -121,7 +99,7 @@ agents = pygame.sprite.Group()
 class Agent(pygame.sprite.Sprite):
     def __init__(self, init_pos):
         pygame.sprite.Sprite.__init__(self, agents)
-        self.speed = [1,1]
+        self.speed = [1, 1]
         self.time_alive = 0
         self.image = bird
         self.image = pygame.transform.scale(self.image, (30, 30))
@@ -133,10 +111,9 @@ class Agent(pygame.sprite.Sprite):
         self.goal = [self.rect.x, self.rect.y]
         colorImage = pygame.Surface(self.image.get_size()).convert_alpha()
         colorImage.fill(BLACK)
-        self.image.blit(colorImage, (0,0), special_flags = pygame.BLEND_RGBA_MULT)
+        self.image.blit(colorImage, (0, 0), special_flags=pygame.BLEND_RGBA_MULT)
         self.lives = 20
         self.region = ''
-
 
     def reproduction(self):
         if pygame.sprite.spritecollide(self, agents, False):
@@ -193,7 +170,6 @@ class Agent(pygame.sprite.Sprite):
         if self.lives <= 0:
             self.kill()
 
-
     def find_goal(self):
         x_goal = randint(100, 740)
         if self.temperature < -5:
@@ -216,18 +192,14 @@ class Agent(pygame.sprite.Sprite):
 
 class Region():
 
-    def __init__(self, name, hemisphere, min_value, max_value, yleft, yright):
+    def __init__(self, name, yleft, yright):
         self.name = name  # name of the temp region
-        self.hemisphere = hemisphere  # hemisphere bool
-        self.min_value = min_value  # min value that the temp can reach
-        self.max_value = max_value  # max value that the temp can reach
-        # location border on the screen
         self.yleft = yleft
         self.uleft = (0, yleft)
-        self.dright = (749, yright)
+        self.dright = (749, yright)  # coordinates for the region
         self.uright = (749, yleft)
         self.dleft = (0, yright)
-        self.font = pygame.font.SysFont("Magenta", 15)
+        self.font = pygame.font.SysFont("Magenta", 15)  # font settings
         self.color = MAGENTA
 
     def temperature(self, current_date, climate_factor):
@@ -237,6 +209,7 @@ class Region():
             temp_values_list = list(temp_values)
             temp_range = temp_values_list[month - 1]
             return randint(temp_range[0] - climate_factor, temp_range[1] + climate_factor)
+            # formula for determining the temperature influenced by the climate factor (same for every temp_region)
 
         if self.name == "Temperate_north":
             month = current_date.month
@@ -273,9 +246,7 @@ class Region():
             temp_range = temp_values_list[month - 1]
             return randint(temp_range[0] - climate_factor, temp_range[1] + climate_factor)
 
-    # add methods
-
-    def draw_display(self):
+    def draw_display(self):  # method for displaying the temperature and region name
 
         region_info = self.font.render(str(self.name), 1, self.color)
         self.displayed_temp = self.temperature(date, Climate_change_factor.val)
@@ -284,12 +255,12 @@ class Region():
         screen.blit(temperature_info, (5, self.yleft + 20))
 
 
-class display_info():
+class display_info():       # function for displaying slider info and date
 
     def __init__(self, xpos, ypos):
         self.xpos = xpos
         self.ypos = ypos
-        self.font = pygame.font.SysFont("Magenta", 20)
+        self.font = pygame.font.SysFont("Magenta", 16)
         self.color = MAGENTA
 
     def draw(self):
@@ -298,14 +269,21 @@ class display_info():
             current_pop = Pop.val
         date_info = self.font.render(str(date), 1, self.color)
         population_info = self.font.render('population:{}'.format(current_pop), 1, self.color)
+        reproduction_info = self.font.render('reproduction rate:{}'.format(Reproduction_rate.val), 1, self.color)
+        lifespan_info = self.font.render('lifespan:{} days'.format(Lifespan.val), 1, self.color)
+        climate_info = self.font.render('climate change factor:{}°C'.format(Climate_change_factor.val), 1, self.color)
         screen.blit(date_info, (self.xpos, self.ypos + 25))
         screen.blit(population_info, (self.xpos, self.ypos))
+        screen.blit(reproduction_info, (self.xpos - 25, self.ypos + 500))
+        screen.blit(lifespan_info, (self.xpos - 25, self.ypos + 530))
+        screen.blit(climate_info, (self.xpos - 25, self.ypos + 560))
+
 
 
 start_img = pygame.image.load('play.png').convert_alpha()
 
 
-class Button():
+class Button():     #class for the start button
     def __init__(self, x, y, image, scale):
         width = image.get_width()
         height = image.get_height()
@@ -325,7 +303,7 @@ class Button():
                 return True
 
 
-class Border():
+class Border():     # class for making screen borders
     def __init__(self, xleft, yleft, xright, yright, color):
         self.xleft = xleft
         self.yleft = yleft
@@ -340,7 +318,7 @@ class Border():
         pygame.draw.line(screen, self.color, (self.xleft, self.yleft), (self.xright, self.yright))
 
 
-def draw_dashed_line(surf, color, start_pos, end_pos, width=1, dash_length=10):
+def draw_dashed_line(surf, color, start_pos, end_pos, width=1, dash_length=10):     # function for drawing dotted lines
     x1, y1 = start_pos
     x2, y2 = end_pos
     dl = dash_length
@@ -369,11 +347,7 @@ def draw_dashed_line(surf, color, start_pos, end_pos, width=1, dash_length=10):
         pygame.draw.line(surf, color, start, end, width)
 
 
-def number_to_month(month_number):
-    months = ["January", "February", "March", "April", "May", "June", "July", "August", "September", "October",
-              "November", "December"]
-    return months[month_number] - 1
-
+#functions to make the graphs
 
 def plot_population_graph():
     xaxis = np.array(days_passed)
@@ -386,7 +360,6 @@ def plot_population_graph():
     plt.show()
 
 
-
 def plot_north_density():
     xaxis = np.array(days_passed)
     yaxis = np.array(north_population)
@@ -396,6 +369,7 @@ def plot_north_density():
     plt.ylabel('Population')
     plt.xlabel('Days passed')
     plt.show()
+
 
 def plot_temperate_north_density():
     xaxis = np.array(days_passed)
@@ -407,6 +381,7 @@ def plot_temperate_north_density():
     plt.xlabel('Days passed')
     plt.show()
 
+
 def plot_tropical_north_density():
     xaxis = np.array(days_passed)
     yaxis = np.array(tropical_north_population)
@@ -416,6 +391,7 @@ def plot_tropical_north_density():
     plt.ylabel('Population')
     plt.xlabel('Days passed')
     plt.show()
+
 
 def plot_tropical_south_density():
     xaxis = np.array(days_passed)
@@ -427,6 +403,7 @@ def plot_tropical_south_density():
     plt.xlabel('Days passed')
     plt.show()
 
+
 def plot_temperate_south_density():
     xaxis = np.array(days_passed)
     yaxis = np.array(temperate_south_population)
@@ -436,6 +413,7 @@ def plot_temperate_south_density():
     plt.ylabel('Population')
     plt.xlabel('Days passed')
     plt.show()
+
 
 def plot_south_density():
     xaxis = np.array(days_passed)
@@ -447,12 +425,19 @@ def plot_south_density():
     plt.xlabel('Days passed')
     plt.show()
 
+#function that calls all graphs
 
-
+def graphs():
+    plot_population_graph()
+    plot_north_density()
+    plot_temperate_north_density()
+    plot_tropical_north_density()
+    plot_tropical_south_density()
+    plot_temperate_south_density()
+    plot_south_density()
 
 
 # some game properties
-
 
 font = pygame.font.SysFont("Verdana", 8)
 clock = pygame.time.Clock()
@@ -487,12 +472,13 @@ sborder_7 = Border(0, 120, 100, 120, BLACK)
 sborders = [sborder_1, sborder_2, sborder_3, sborder_4, sborder_5, sborder_6, sborder_7]
 
 # regions
-North = Region("North", 1, 0, 30, 0, 120)
-Temperate_north = Region("Temperate_north", 1, 0, 30, 121, 240)
-Tropical_north = Region("Tropical_north", 1, 0, 30, 241, 300)
-Tropical_south = Region("Tropical_south", 1, 0, 30, 301, 360)
-Temperate_south = Region("Temperate_south", 1, 0, 30, 361, 480)
-South = Region("South", 1, 0, 30, 481, 600)
+
+North = Region("North", 0, 120)
+Temperate_north = Region("Temperate_north", 121, 240)
+Tropical_north = Region("Tropical_north", 241, 300)
+Tropical_south = Region("Tropical_south", 301, 360)
+Temperate_south = Region("Temperate_south", 361, 480)
+South = Region("South", 481, 600)
 
 regions = [North, Temperate_north, Temperate_south, Tropical_north, Tropical_south, South]
 
@@ -547,7 +533,6 @@ tropical_south_counter = 0
 temperate_south_counter = 0
 south_population_counter = 0
 
-
 # Game Loop
 running = True
 run_simulation = False
@@ -560,13 +545,7 @@ while running:
     for event in pygame.event.get():
         if event.type == pygame.QUIT:
             running = False
-            plot_population_graph()
-            plot_north_density()
-            plot_temperate_north_density()
-            plot_tropical_north_density()
-            plot_tropical_south_density()
-            plot_temperate_south_density()
-            plot_south_density()
+            graphs()
             pygame.quit()
             sys.exit()
 
@@ -640,7 +619,6 @@ while running:
         tropical_south_counter = 0
         temperate_south_counter = 0
         south_population_counter = 0
-
 
         current_pop = len(agents)
         population_list.append(current_pop)
