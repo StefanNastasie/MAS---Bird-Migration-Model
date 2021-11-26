@@ -435,6 +435,16 @@ def plot_south_density():
     plt.xlabel('Days passed')
     plt.show()
 
+def plot_pie():
+    labels = 'Natural', 'Temperature'
+    sizes = [Deaths.natural, Deaths.temp]
+    explode = (0, 0.1)
+    fig1, ax1 = plt.subplots()
+    ax1.pie(sizes, explode = explode, labels = labels, autopct = '%1.1f%%')
+    plt.title('Natural vs temperature related deaths')
+    ax1.axis('equal')
+    plt.show()
+
 #function that calls all graphs
 
 def graphs():
@@ -445,6 +455,7 @@ def graphs():
     plot_tropical_south_density()
     plot_temperate_south_density()
     plot_south_density()
+    plot_pie()
 
 
 # some game properties
@@ -608,15 +619,15 @@ while running:
         for agent in agents:
             if agent.rect.y <= 120:
                 north_population_counter += 1
-            if 240 >= agent.rect.y > 120:
+            elif 240 >= agent.rect.y > 120:
                 temperate_north_counter += 1
-            if 300 >= agent.rect.y > 240:
+            elif 300 >= agent.rect.y > 240:
                 tropical_north_counter += 1
-            if 360 >= agent.rect.y > 300:
+            elif 360 >= agent.rect.y > 300:
                 tropical_south_counter += 1
-            if 480 >= agent.rect.y > 360:
+            elif 480 >= agent.rect.y > 360:
                 temperate_south_counter += 1
-            if 600 >= agent.rect.y > 480:
+            elif 600 >= agent.rect.y > 480:
                 south_population_counter += 1
 
         north_population.append(north_population_counter)
