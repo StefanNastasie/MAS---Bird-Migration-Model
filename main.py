@@ -359,103 +359,106 @@ def draw_dashed_line(surf, color, start_pos, end_pos, width=1, dash_length=10): 
 
 #functions to make the graphs
 
-def plot_population_graph():
+def plot_population_graph(plt):
     xaxis = np.array(days_passed)
     yaxis = np.array(population_list)
 
     plt.plot(xaxis, yaxis)
-    plt.title('Population graph by days passed')
-    plt.ylabel('Population')
-    plt.xlabel('Days passed')
-    plt.show()
+    plt.set_title('Population graph by days passed')
+    plt.set_ylabel('Population')
+    plt.set_xlabel('Days passed')
+    #plt.show()
 
 
-def plot_north_density():
+def plot_north_density(plt):
     xaxis = np.array(days_passed)
     yaxis = np.array(north_population)
 
     plt.plot(xaxis, yaxis)
-    plt.title('Population density in the northern region')
-    plt.ylabel('Population')
-    plt.xlabel('Days passed')
-    plt.show()
+    plt.set_title('Population density in the northern region')
+    plt.set_ylabel('Population')
+    plt.set_xlabel('Days passed')
+    #plt.show()
 
 
-def plot_temperate_north_density():
+def plot_temperate_north_density(plt):
     xaxis = np.array(days_passed)
     yaxis = np.array(temperate_north_population)
 
     plt.plot(xaxis, yaxis)
-    plt.title('Population density in the temperate_north region')
-    plt.ylabel('Population')
-    plt.xlabel('Days passed')
-    plt.show()
+    plt.set_title('Population density in the temperate_north region')
+    plt.set_ylabel('Population')
+    plt.set_xlabel('Days passed')
+    #plt.show()
 
 
-def plot_tropical_north_density():
+def plot_tropical_north_density(plt):
     xaxis = np.array(days_passed)
     yaxis = np.array(tropical_north_population)
 
     plt.plot(xaxis, yaxis)
-    plt.title('Population density in the tropical_north region')
-    plt.ylabel('Population')
-    plt.xlabel('Days passed')
-    plt.show()
+    plt.set_title('Population density in the tropical_north region')
+    plt.set_ylabel('Population')
+    plt.set_xlabel('Days passed')
+    #plt.show()
 
 
-def plot_tropical_south_density():
+def plot_tropical_south_density(plt):
     xaxis = np.array(days_passed)
     yaxis = np.array(tropical_south_population)
 
     plt.plot(xaxis, yaxis)
-    plt.title('Population density in the tropical_south region')
-    plt.ylabel('Population')
-    plt.xlabel('Days passed')
-    plt.show()
+    plt.set_title('Population density in the tropical_south region')
+    plt.set_ylabel('Population')
+    plt.set_xlabel('Days passed')
+    #plt.show()
 
 
-def plot_temperate_south_density():
+def plot_temperate_south_density(plt):
     xaxis = np.array(days_passed)
     yaxis = np.array(temperate_south_population)
 
     plt.plot(xaxis, yaxis)
-    plt.title('Population density in the temperate_south region')
-    plt.ylabel('Population')
-    plt.xlabel('Days passed')
-    plt.show()
+    plt.set_title('Population density in the temperate_south region')
+    plt.set_ylabel('Population')
+    plt.set_xlabel('Days passed')
+    #plt.show()
 
 
-def plot_south_density():
+def plot_south_density(plt):
     xaxis = np.array(days_passed)
     yaxis = np.array(south_population)
 
     plt.plot(xaxis, yaxis)
-    plt.title('Population density in the southern region')
-    plt.ylabel('Population')
-    plt.xlabel('Days passed')
-    plt.show()
+    plt.set_title('Population density in the southern region')
+    plt.set_ylabel('Population')
+    plt.set_xlabel('Days passed')
+    #plt.show()
 
-def plot_pie():
+def plot_pie(plt):
     labels = 'Natural', 'Temperature'
     sizes = [Deaths.natural, Deaths.temp]
     explode = (0, 0.1)
-    fig1, ax1 = plt.subplots()
-    ax1.pie(sizes, explode = explode, labels = labels, autopct = '%1.1f%%')
-    plt.title('Natural vs temperature related deaths')
-    ax1.axis('equal')
-    plt.show()
+    plt.pie(sizes, explode = explode, labels = labels, autopct = '%1.1f%%')
+    plt.set_title('Natural vs temperature related deaths')
+    plt.axis('equal')
+    #plt.show()
 
 #function that calls all graphs
 
 def graphs():
-    plot_population_graph()
-    plot_north_density()
-    plot_temperate_north_density()
-    plot_tropical_north_density()
-    plot_tropical_south_density()
-    plot_temperate_south_density()
-    plot_south_density()
-    plot_pie()
+    fig1, ((ax1, ax2), (ax3, ax4)) = plt.subplots(2,2)
+    plot_population_graph(ax1)
+    plot_north_density(ax2)
+    plot_temperate_north_density(ax3)
+    plot_tropical_north_density(ax4)
+    plt.show()
+    fig2, ((ax5, ax6), (ax7, ax8)) = plt.subplots(2,2)
+    plot_tropical_south_density(ax5)
+    plot_temperate_south_density(ax6)
+    plot_south_density(ax7)
+    plot_pie(ax8)
+    plt.show()
 
 
 # some game properties
