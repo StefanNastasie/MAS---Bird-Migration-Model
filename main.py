@@ -28,6 +28,7 @@ MAGENTA = (255, 0, 255)
 TRANS = (1, 1, 1)
 BBYBLUE = (202, 228, 241)
 
+
 # class for the parameter sliders
 
 class Slider():
@@ -121,7 +122,7 @@ class Agent(pygame.sprite.Sprite):
                     self.cooldown = 360
             else:
                 self.cooldown -= 1
-                
+
     # Get the agents current geographical region in order to get the agents current temperature
     def get_region(self):
         if self.rect.y > 480:
@@ -136,7 +137,7 @@ class Agent(pygame.sprite.Sprite):
             self.region = Temperate_north
         else:
             self.region = North
-            
+
     # If the agent is close to its goal, or if its at a critical temperature, it chooses a new goal and moves towards it.
     def move(self):
         if abs(self.rect.x - self.goal[0]) <= 5 and abs(self.rect.y - self.goal[1]) <= 5:
@@ -152,7 +153,7 @@ class Agent(pygame.sprite.Sprite):
             self.rect.y -= self.speed[1]
         if (self.rect.y - self.goal[1]) < -5:
             self.rect.y += self.speed[1]
-            
+
     # Update method containing all necessary methods for a tick
     def update(self):
         self.get_region()
@@ -160,20 +161,18 @@ class Agent(pygame.sprite.Sprite):
         self.check_death()
         self.move()
         self.time_alive += 1
-        
+
     # If the agent has been alive a certain amount of days or is at a critical temperature for a few days in succession it dies. The agent can regenerate at ideal temperatures.
     def check_death(self):
         if self.time_alive > Lifespan.val:
             self.kill()
-            Deaths.natural += 1
         if self.temperature < -5 or self.temperature > 40:
             self.lives -= 1
         if self.temperature > 15 and self.temperature < 25 and self.lives < 15:
             self.lives += 1
         if self.lives <= 0:
             self.kill()
-            Deaths.temp += 1
-            
+
     # The agent chooses a random new goal. If its temperature is ideal the new choice is only limited to the agents hemisphere. If temperature is not ideal the choice is limited to warmer/colder regions.
     def find_goal(self):
         x_goal = randint(100, 740)
@@ -194,11 +193,6 @@ class Agent(pygame.sprite.Sprite):
                 y_goal = randint(0, 300)
         self.goal = [x_goal, y_goal]
 
-# To track the natural vs temperature related deaths for the chart
-class Deaths():
-    def __init__(self, temp, natural):
-        self.temp = 0
-        self.natural = 0
 
 class Region():
 
@@ -359,106 +353,101 @@ def draw_dashed_line(surf, color, start_pos, end_pos, width=1, dash_length=10): 
 
 #functions to make the graphs
 
-def plot_population_graph(plt):
+def plot_population_graph():
     xaxis = np.array(days_passed)
     yaxis = np.array(population_list)
 
     plt.plot(xaxis, yaxis)
-    plt.set_title('Population graph by days passed')
-    plt.set_ylabel('Population')
-    plt.set_xlabel('Days passed')
-    #plt.show()
+    plt.title('Population graph by days passed')
+    plt.ylabel('Population')
+    plt.xlabel('Days passed')
+    plt.show()
 
 
-def plot_north_density(plt):
+def plot_north_density():
     xaxis = np.array(days_passed)
     yaxis = np.array(north_population)
 
     plt.plot(xaxis, yaxis)
-    plt.set_title('Population density in the northern region')
-    plt.set_ylabel('Population')
-    plt.set_xlabel('Days passed')
-    #plt.show()
+    plt.title('Population density in the northern region')
+    plt.ylabel('Population')
+    plt.xlabel('Days passed')
+    plt.show()
 
 
-def plot_temperate_north_density(plt):
+def plot_temperate_north_density():
     xaxis = np.array(days_passed)
     yaxis = np.array(temperate_north_population)
 
     plt.plot(xaxis, yaxis)
-    plt.set_title('Population density in the temperate_north region')
-    plt.set_ylabel('Population')
-    plt.set_xlabel('Days passed')
-    #plt.show()
+    plt.title('Population density in the temperate_north region')
+    plt.ylabel('Population')
+    plt.xlabel('Days passed')
+    plt.show()
 
 
-def plot_tropical_north_density(plt):
+def plot_tropical_north_density():
     xaxis = np.array(days_passed)
     yaxis = np.array(tropical_north_population)
 
     plt.plot(xaxis, yaxis)
-    plt.set_title('Population density in the tropical_north region')
-    plt.set_ylabel('Population')
-    plt.set_xlabel('Days passed')
-    #plt.show()
+    plt.title('Population density in the tropical_north region')
+    plt.ylabel('Population')
+    plt.xlabel('Days passed')
+    plt.show()
 
 
-def plot_tropical_south_density(plt):
+def plot_tropical_south_density():
     xaxis = np.array(days_passed)
     yaxis = np.array(tropical_south_population)
 
     plt.plot(xaxis, yaxis)
-    plt.set_title('Population density in the tropical_south region')
-    plt.set_ylabel('Population')
-    plt.set_xlabel('Days passed')
-    #plt.show()
+    plt.title('Population density in the tropical_south region')
+    plt.ylabel('Population')
+    plt.xlabel('Days passed')
+    plt.show()
 
 
-def plot_temperate_south_density(plt):
+def plot_temperate_south_density():
     xaxis = np.array(days_passed)
     yaxis = np.array(temperate_south_population)
 
     plt.plot(xaxis, yaxis)
-    plt.set_title('Population density in the temperate_south region')
-    plt.set_ylabel('Population')
-    plt.set_xlabel('Days passed')
-    #plt.show()
+    plt.title('Population density in the temperate_south region')
+    plt.ylabel('Population')
+    plt.xlabel('Days passed')
+    plt.show()
 
 
-def plot_south_density(plt):
+def plot_south_density():
     xaxis = np.array(days_passed)
     yaxis = np.array(south_population)
 
     plt.plot(xaxis, yaxis)
-    plt.set_title('Population density in the southern region')
-    plt.set_ylabel('Population')
-    plt.set_xlabel('Days passed')
-    #plt.show()
-
-def plot_pie(plt):
-    labels = 'Natural', 'Temperature'
-    sizes = [Deaths.natural, Deaths.temp]
-    explode = (0, 0.1)
-    plt.pie(sizes, explode = explode, labels = labels, autopct = '%1.1f%%')
-    plt.set_title('Natural vs temperature related deaths')
-    plt.axis('equal')
-    #plt.show()
+    plt.title('Population density in the southern region')
+    plt.ylabel('Population')
+    plt.xlabel('Days passed')
+    plt.show()
 
 #function that calls all graphs
 
 def graphs():
-    fig1, ((ax1, ax2), (ax3, ax4)) = plt.subplots(2,2)
-    plot_population_graph(ax1)
-    plot_north_density(ax2)
-    plot_temperate_north_density(ax3)
-    plot_tropical_north_density(ax4)
-    plt.show()
-    fig2, ((ax5, ax6), (ax7, ax8)) = plt.subplots(2,2)
-    plot_tropical_south_density(ax5)
-    plot_temperate_south_density(ax6)
-    plot_south_density(ax7)
-    plot_pie(ax8)
-    plt.show()
+    plot_population_graph()
+    plot_north_density()
+    plot_temperate_north_density()
+    plot_tropical_north_density()
+    plot_tropical_south_density()
+    plot_temperate_south_density()
+    plot_south_density()
+
+
+
+
+def condition_exit(stop_date):
+    if date.year == stop_date.year and date.month == stop_date.month and date.day == stop_date.day:
+        return True
+    else:
+        return False
 
 
 # some game properties
@@ -472,9 +461,6 @@ date = datetime.date(2022, 1, 1)
 date_change = datetime.timedelta(days=1)
 display = display_info(X - 120, 10)
 start_button = Button(X - 120, 60, start_img, 0.1)
-
-#Death counter for chart
-Deaths = Deaths(0,0)
 
 # region borders
 
@@ -617,20 +603,27 @@ while running:
                 agent.reproduction()
                 agents.add(agent)
         date += date_change
+
+        if condition_exit(datetime.date(2027, 1, 1)):
+            running = False
+            graphs()
+            pygame.quit()
+            sys.exit()
+
         days_counter += 1
         days_passed.append(days_counter)
         for agent in agents:
             if agent.rect.y <= 120:
                 north_population_counter += 1
-            elif 240 >= agent.rect.y > 120:
+            if 240 >= agent.rect.y > 120:
                 temperate_north_counter += 1
-            elif 300 >= agent.rect.y > 240:
+            if 300 >= agent.rect.y > 240:
                 tropical_north_counter += 1
-            elif 360 >= agent.rect.y > 300:
+            if 360 >= agent.rect.y > 300:
                 tropical_south_counter += 1
-            elif 480 >= agent.rect.y > 360:
+            if 480 >= agent.rect.y > 360:
                 temperate_south_counter += 1
-            elif 600 >= agent.rect.y > 480:
+            if 600 >= agent.rect.y > 480:
                 south_population_counter += 1
 
         north_population.append(north_population_counter)
@@ -655,3 +648,4 @@ while running:
 
     clock.tick(Speed.val)
     pygame.display.flip()
+
